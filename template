@@ -1,0 +1,60 @@
+
+template<typename Func, typename... Args>
+struct Bindable {
+  Func func;
+  std::tuple<Args...> m_args;
+
+  Bindable(Func&& f, Args&&... args) : 
+    func(std::forward<Func>(f))
+    , m_args(std::forward<Args>(args)...)
+  {
+  }
+
+  template<typename... CallArgs>
+  auto operator()(CallArgs&&... call_args) {
+    return std::apply(
+      [&,call_args...](auto&&... tuple_args) {
+      return std::invoke(func, std::forward<CallArgs>(call_args)..., std::forward<decltype(tuple_args)>(tuple_args)...);
+    },
+      m_args
+      );
+  }
+};
+
+template<typename Func, typename... Args>
+Bindable<Func, Args...> make_bind(Func&& func, Args&&... args) {
+  return { std::forward<Func>(func), std::forward<Args>(args)... };
+}
+
+// 用于绑定成员函数的工厂函数
+template<typename T, typename Func, typename... Args>
+Bindable<std::function<void(Args...)>, Args...> make_bind(T& obj, Func T::*func, Args&&... args) {
+  return {
+      [obj, func](Args... call_args) mutable {
+          (obj.*func)(std::forward<Args>(call_args)...);
+      },
+      std::forward<Args>(args)...
+  };
+}
+
+
+void fun1(int ii, std::string  s, double dd)
+{
+  std::cout << ii << " ," << s.c_str() << " , " << dd << std::endl;
+}
+
+class MyClass {
+public:
+  void myFunction(int arg1, double arg2) {
+    std::cout << "Called with: " << arg1 << ", " << arg2 << std::endl;
+  }
+};
+
+int main()
+{
+
+  MyClass obj;
+  auto boundMemberFunction = make_bind(obj, &MyClass::myFunction, 10,20);
+
+  auto bound_add = make_bind(fun1, 1, std::string("d"), 3.0);
+}
