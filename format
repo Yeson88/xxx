@@ -1,0 +1,7 @@
+/** 枚举设备
+@funtion  enumDev
+@param[in]  type 设备类型
+@param[in]  nId 设备ID
+@param[in]  lstRes 待拷贝资源列表
+@param[out] num  获取到的个数
+*/
