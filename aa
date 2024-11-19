@@ -1,7 +1,0 @@
-class DllMsmCb {
-public:
-	virtual void OnChanged(* void manager, int status, int status) = 0;
-	virtual void OnUpdate(uint64_t in, uint64_t out) = 0;
-  virtual void OnErrLog(std::string strErr, std::string StrType) = 0;
-  virtual void OnSetFlag(bool bUsed) = 0;
-};
